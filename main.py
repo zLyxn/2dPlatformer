@@ -41,7 +41,16 @@ class Game:
 
 class Player:
     def __init__(self) -> None:
-        pass
+        self.spaceship: pygame.image = pygame.image.load(
+            'assest/player.png'
+        )
+
+    def handleMovement(self) -> None:
+        playerKeys = pygame.key.get_pressed()
+        speed: int = PLAYER_SPEED
+
+        if (playerKeys[pygame.K_w] or playerKeys[pygame.K_UP]) and self.spaceShipRect.y > 0:
+            self.spaceShipRect.y -= speed * dt
 
 
 frame: int = 0
