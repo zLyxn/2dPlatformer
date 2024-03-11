@@ -39,12 +39,12 @@ class Game:
 
     @staticmethod
     def handleBackground() -> None:
-        bg: pygame.image = pygame.image.load("./assets/img/background.png")
+        # bg: pygame.image = pygame.image.load("./assets/img/background.png")
         # screen.blit(bg, (0, 0))
-        pygame.draw.rect(, "red", (100, 100))
+        screen.fill("red")
 
     @staticmethod
-    def quit() -> None:
+    def close() -> None:
         pygame.quit()
         print("""
              ____             _ 
@@ -81,17 +81,16 @@ class Player:
 
     def handleGravity(self) -> None:
         gravity: int = GRAVITY
-        # self.bodyRect.y -= self.velocityY * dt
-        # self.velocityY -= gravity
-        if self.bodyRect.y < screen.get_height() - self.bodyRect.height:
-            self.bodyRect.y += gravity * dt
+        if self.bodyRect.y < screen.get_height() - self.bodyRect.height*1.5:
+            self.bodyRect.y -= self.velocityY * dt
+            self.velocityY -= gravity * dt
 
 
 frame: int = 0
 game: Game = Game()
 
 while game.isRunning:
-    dt: clock = clock.tick(70) / 1000
+    dt: clock = clock.tick(60) / 1000
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game.isRunning = False
