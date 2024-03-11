@@ -22,7 +22,11 @@ class Game:
     def __init__(self) -> None:
         self.isRunning: bool = True
 
-    def quit(self) -> None:
+    def loop(self) -> None:
+        pass
+
+    @staticmethod
+    def quit() -> None:
         pygame.quit()
         print("""
              ____             _ 
@@ -35,8 +39,14 @@ class Game:
         quit()
 
 
+class Player:
+    def __init__(self) -> None:
+        pass
+
+
 frame: int = 0
 game: Game = Game()
+
 while game.isRunning:
     dt: clock = clock.tick(60) / 1000
     for event in pygame.event.get():
@@ -47,5 +57,6 @@ while game.isRunning:
     if keys[pygame.K_ESCAPE]:
         game.isRunning = False
 
-        # HERE
+    game.loop()
+    # https://gamemaker.io/de/tutorials/easy-platformer
 game.quit()
