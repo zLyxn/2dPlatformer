@@ -131,3 +131,8 @@ while game.isRunning:
     pygame.display.flip()
     # https://gamemaker.io/de/tutorials/easy-platformer
 game.quit()
+
+# IDEE FÜR GRÖßE
+# var = screen.width/12,8
+# block.height = var
+# block.width = var
