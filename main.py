@@ -8,18 +8,19 @@ try:
 except ModuleNotFoundError:
     import tomli as tomllib
 
-PLAYER_SPEED: int = 0
-PLAYER_SPAWN_X: int = 0
-PLAYER_SPAWN_Y: int = 0
+PLAYER_SPEED: int = 120
+PLAYER_SPAWN_X: int = 50
+PLAYER_SPAWN_Y: int = 50
+GRAVITY: int = 100
 
-with open("./config.toml", "rb") as f:
-    data: dict[str, Any] = tomllib.load(f)
-for d in data:
-    globals()[d] = data.get(d)
+# with open("./config.toml", "rb") as f:
+#    data: dict[str, Any] = tomllib.load(f)
+# for d in data:
+#    globals()[d] = data.get(d)
 
 pygame.init()
 screen: pygame.display = pygame.display.set_mode()
-clock: pygame.time = pygame.time.Clock()
+clock: pygame.time.Clock = pygame.time.Clock()
 dt: clock = None
 
 
@@ -36,9 +37,11 @@ class Game:
         self.player.handleMovement()
         screen.blit(self.player.body, self.player.bodyRect)
 
-    def handleBackground(self) -> None:
+    @staticmethod
+    def handleBackground() -> None:
         bg: pygame.image = pygame.image.load("./assets/img/background.png")
-        screen.blit(bg, (0, 0))
+        # screen.blit(bg, (0, 0))
+        pygame.draw.rect(, "red", (100, 100))
 
     @staticmethod
     def quit() -> None:
@@ -67,58 +70,28 @@ class Player:
             (screen.get_height() * (PLAYER_SPAWN_Y / 100) - (self.bodyRect.height * (PLAYER_SPAWN_Y / 100))))
         self.bodyRect.update(spawnX, spawnY, self.bodyRect.height, self.bodyRect.width)
 
-        self.speed_x = 0
+        self.velocityX = 0
+        self.velocityY = 0
 
     def handleMovement(self) -> None:
         playerKeys = pygame.key.get_pressed()
         acceleration: float = 0.2  # Adjust acceleration for smoother movement
         max_speed: float = 5  # Adjust maximum speed
-        gravity: float = 1.5
+        self.handleGravity()
 
-        # Horizontal Movement
-        if playerKeys[pygame.K_a]:
-            self.speed_x -= acceleration * dt
-        elif playerKeys[pygame.K_d]:
-            self.speed_x += acceleration * dt
-        else:
-            # Deceleration if no keys are pressed
-            if self.speed_x > 0:
-                self.speed_x -= acceleration * dt
-            elif self.speed_x < 0:
-                self.speed_x += acceleration * dt
-
-        # Cap the speed
-        self.speed_x = max(-max_speed, min(self.speed_x, int(max_speed)))
-
-        # Update position
-        self.bodyRect.x += self.speed_x
-
-        # Vertical Movement (for jumping, etc.)
-        if playerKeys[pygame.K_w] and self.bodyRect.y > 0:
-            self.bodyRect.y -= PLAYER_SPEED * dt
-
-        # Apply Gravity
+    def handleGravity(self) -> None:
+        gravity: int = GRAVITY
+        # self.bodyRect.y -= self.velocityY * dt
+        # self.velocityY -= gravity
         if self.bodyRect.y < screen.get_height() - self.bodyRect.height:
             self.bodyRect.y += gravity * dt
-
-        # Limit Horizontal Speed
-        if self.bodyRect.x < 0:
-            self.bodyRect.x = 0
-        elif self.bodyRect.x > screen.get_width() - self.bodyRect.width:
-            self.bodyRect.x = screen.get_width() - self.bodyRect.width
-
-        # Limit Vertical Speed
-        if self.bodyRect.y < 0:
-            self.bodyRect.y = 0
-        elif self.bodyRect.y > screen.get_height() - self.bodyRect.height:
-            self.bodyRect.y = screen.get_height() - self.bodyRect.height
 
 
 frame: int = 0
 game: Game = Game()
 
 while game.isRunning:
-    dt: clock = clock.tick(60) / 1000
+    dt: clock = clock.tick(70) / 1000
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game.isRunning = False
