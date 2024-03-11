@@ -37,7 +37,7 @@ class Game:
         screen.blit(self.player.body, self.player.bodyRect)
 
     def handleBackground(self) -> None:
-        bg: pygame.image = pygame.image.load("./assets/img/player.png")
+        bg: pygame.image = pygame.image.load("./assets/img/background.png")
         screen.blit(bg, (0, 0))
 
     @staticmethod
@@ -59,6 +59,7 @@ class Player:
         self.body: pygame.image = pygame.image.load(
             './assets/img/player.png'
         )
+        self.body = pygame.transform.scale_by(self.body, (0.3, 0.2))
         self.bodyRect: pygame.Rect = self.body.get_rect()
         spawnX: int = int(
             (screen.get_width() * (PLAYER_SPAWN_X / 100) - (self.bodyRect.width * (PLAYER_SPAWN_X / 100))))
@@ -66,12 +67,51 @@ class Player:
             (screen.get_height() * (PLAYER_SPAWN_Y / 100) - (self.bodyRect.height * (PLAYER_SPAWN_Y / 100))))
         self.bodyRect.update(spawnX, spawnY, self.bodyRect.height, self.bodyRect.width)
 
+        self.speed_x = 0
+
     def handleMovement(self) -> None:
         playerKeys = pygame.key.get_pressed()
-        speed: int = PLAYER_SPEED
+        acceleration: float = 0.2  # Adjust acceleration for smoother movement
+        max_speed: float = 5  # Adjust maximum speed
+        gravity: float = 1.5
 
-        if (playerKeys[pygame.K_w]) and self.bodyRect.y > 0:
-            self.bodyRect.y -= speed * dt
+        # Horizontal Movement
+        if playerKeys[pygame.K_a]:
+            self.speed_x -= acceleration * dt
+        elif playerKeys[pygame.K_d]:
+            self.speed_x += acceleration * dt
+        else:
+            # Deceleration if no keys are pressed
+            if self.speed_x > 0:
+                self.speed_x -= acceleration * dt
+            elif self.speed_x < 0:
+                self.speed_x += acceleration * dt
+
+        # Cap the speed
+        self.speed_x = max(-max_speed, min(self.speed_x, int(max_speed)))
+
+        # Update position
+        self.bodyRect.x += self.speed_x
+
+        # Vertical Movement (for jumping, etc.)
+        if playerKeys[pygame.K_w] and self.bodyRect.y > 0:
+            self.bodyRect.y -= PLAYER_SPEED * dt
+
+        # Apply Gravity
+        if self.bodyRect.y < screen.get_height() - self.bodyRect.height:
+            self.bodyRect.y += gravity * dt
+
+        # Limit Horizontal Speed
+        if self.bodyRect.x < 0:
+            self.bodyRect.x = 0
+        elif self.bodyRect.x > screen.get_width() - self.bodyRect.width:
+            self.bodyRect.x = screen.get_width() - self.bodyRect.width
+
+        # Limit Vertical Speed
+        if self.bodyRect.y < 0:
+            self.bodyRect.y = 0
+        elif self.bodyRect.y > screen.get_height() - self.bodyRect.height:
+            self.bodyRect.y = screen.get_height() - self.bodyRect.height
 
 
 frame: int = 0
@@ -88,5 +128,6 @@ while game.isRunning:
         game.isRunning = False
 
     game.loop()
+    pygame.display.flip()
     # https://gamemaker.io/de/tutorials/easy-platformer
 game.quit()
