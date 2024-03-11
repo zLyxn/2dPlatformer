@@ -1,11 +1,16 @@
 from typing import Any
 import pygame
-from threading import Timer
+
+# from threading import Timer
 
 try:
     import tomllib
 except ModuleNotFoundError:
     import tomli as tomllib
+
+PLAYER_SPEED: int = 0
+PLAYER_SPAWN_X: int = 0
+PLAYER_SPAWN_Y: int = 0
 
 with open("./config.toml", "rb") as f:
     data: dict[str, Any] = tomllib.load(f)
@@ -21,9 +26,19 @@ dt: clock = None
 class Game:
     def __init__(self) -> None:
         self.isRunning: bool = True
+        self.player: Player = Player()
 
     def loop(self) -> None:
-        pass
+        self.handleBackground()
+        self.handlePlayer()
+
+    def handlePlayer(self) -> None:
+        self.player.handleMovement()
+        screen.blit(self.player.body, self.player.bodyRect)
+
+    def handleBackground(self) -> None:
+        bg: pygame.image = pygame.image.load("./assets/img/player.png")
+        screen.blit(bg, (0, 0))
 
     @staticmethod
     def quit() -> None:
@@ -41,16 +56,22 @@ class Game:
 
 class Player:
     def __init__(self) -> None:
-        self.spaceship: pygame.image = pygame.image.load(
-            'assest/player.png'
+        self.body: pygame.image = pygame.image.load(
+            './assets/img/player.png'
         )
+        self.bodyRect: pygame.Rect = self.body.get_rect()
+        spawnX: int = int(
+            (screen.get_width() * (PLAYER_SPAWN_X / 100) - (self.bodyRect.width * (PLAYER_SPAWN_X / 100))))
+        spawnY: int = int(
+            (screen.get_height() * (PLAYER_SPAWN_Y / 100) - (self.bodyRect.height * (PLAYER_SPAWN_Y / 100))))
+        self.bodyRect.update(spawnX, spawnY, self.bodyRect.height, self.bodyRect.width)
 
     def handleMovement(self) -> None:
         playerKeys = pygame.key.get_pressed()
         speed: int = PLAYER_SPEED
 
-        if (playerKeys[pygame.K_w] or playerKeys[pygame.K_UP]) and self.spaceShipRect.y > 0:
-            self.spaceShipRect.y -= speed * dt
+        if (playerKeys[pygame.K_w]) and self.bodyRect.y > 0:
+            self.bodyRect.y -= speed * dt
 
 
 frame: int = 0
