@@ -23,11 +23,27 @@ screen: pygame.display = pygame.display.set_mode()
 clock: pygame.time.Clock = pygame.time.Clock()
 dt: clock = None
 
+class Level:
+    def __init__(self) -> None:
+        self.blockSize: int = screen.get_height()
+        self.createLevel1()
+        self.block = Block()
+    def createLevel1(self):
+        screen.blit(self.block.dirt, self.block.dirtRect)
+
+class Block:
+    def __init__(self) -> None:
+        self.dirt = pygame.image.load("./assets/img/dirt.png")
+        self.dirtRect = pygame.Rect(0, 0, self.dirt)
+        self.grass = pygame.image.load("./assets/img/grass.png")
+        self.grassRect = pygame.Rect(0, 0, self.grass)
+
 
 class Game:
     def __init__(self) -> None:
         self.isRunning: bool = True
         self.player: Player = Player()
+        self.level: Level = Level()
 
     def loop(self) -> None:
         self.handleBackground()
