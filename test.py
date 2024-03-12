@@ -124,7 +124,7 @@ class platform(pygame.sprite.Sprite):
                 self.rect.left = WIDTH
 
     def generateCoin(self):
-        if (self.speed == 0):
+        if self.speed == 0:
             coins.add(Coin((self.rect.centerx, self.rect.centery - 50)))
 
 
