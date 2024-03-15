@@ -93,7 +93,7 @@ class Coin(pygame.sprite.Sprite):
             self.kill()
 
 
-class platform(pygame.sprite.Sprite):
+class Platform(pygame.sprite.Sprite):
     def __init__(self, width=0, height=18):
         super().__init__()
 
@@ -145,13 +145,13 @@ def plat_gen():
     while len(platforms) < 6:
         width = random.randrange(50, 100)
         p = None
-        C = True
+        checked = True
 
-        while C:
-            p = platform()
+        while checked:
+            p = Platform()
             p.rect.center = (random.randrange(0, WIDTH - width),
                              random.randrange(-50, 0))
-            C = check(p, platforms)
+            checked = check(p, platforms)
 
         p.generateCoin()
         platforms.add(p)
@@ -162,7 +162,7 @@ all_sprites = pygame.sprite.Group()
 platforms = pygame.sprite.Group()
 coins = pygame.sprite.Group()
 
-PT1 = platform(450, 80)
+PT1 = Platform(450, 80)
 # PT1.surf = pygame.Surface((WIDTH, 20))
 # PT1.surf.fill((255,0,0))
 PT1.rect = PT1.surf.get_rect(center=(WIDTH / 2, HEIGHT - 10))
@@ -177,9 +177,9 @@ platforms.add(PT1)
 
 for x in range(random.randint(4, 5)):
     C = True
-    pl = platform()
+    pl = Platform()
     while C:
-        pl = platform()
+        pl = Platform()
         C = check(pl, platforms)
     pl.generateCoin()
     platforms.add(pl)
@@ -220,7 +220,7 @@ while True:
             if coin.rect.top >= HEIGHT:
                 coin.kill()
 
-    plat_gen()
+    # plat_gen()
     displaysurface.blit(background, (0, 0))
     f = pygame.font.SysFont("Verdana", 20)
     g = f.render(str(P1.score), True, (123, 255, 0))
