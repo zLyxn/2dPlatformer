@@ -82,7 +82,7 @@ class Coin(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
 
-        self.image = pygame.image.load("./assets/img/cloud.png")
+        self.image = pygame.image.load("./assets/img/coin.png")
         self.rect = self.image.get_rect()
 
         self.rect.topleft = pos
