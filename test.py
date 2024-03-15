@@ -18,13 +18,13 @@ FramePerSec = pygame.time.Clock()
 displaysurface = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Game")
 
-background = pygame.image.load("background.png")
+background = pygame.image.load("./assets/img/background.png")
 
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.surf = pygame.image.load("snowman.png")
+        self.surf = pygame.image.load("./assets/img/player.png")
         self.rect = self.surf.get_rect()
 
         self.pos = vec((10, 360))
@@ -82,7 +82,7 @@ class Coin(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
 
-        self.image = pygame.image.load("Coin.png")
+        self.image = pygame.image.load("./assets/img/cloud.png")
         self.rect = self.image.get_rect()
 
         self.rect.topleft = pos
@@ -100,7 +100,7 @@ class platform(pygame.sprite.Sprite):
         if width == 0:
             width = random.randint(50, 120)
 
-        self.image = pygame.image.load("platform.png")
+        self.image = pygame.image.load("./assets/img/dirt.png")
         self.surf = pygame.transform.scale(self.image, (width, height))
         self.rect = self.surf.get_rect(center=(random.randint(0, WIDTH - 10),
                                                random.randint(0, HEIGHT - 30)))
@@ -109,12 +109,12 @@ class platform(pygame.sprite.Sprite):
         self.moving = True
         self.speed = random.randint(-1, 1)
 
-        if (self.speed == 0):
+        if self.speed == 0:
             self.moving == False
 
     def move(self):
         hits = self.rect.colliderect(P1.rect)
-        if self.moving == True:
+        if self.moving:
             self.rect.move_ip(self.speed, 0)
             if hits:
                 P1.pos += (self.speed, 0)
