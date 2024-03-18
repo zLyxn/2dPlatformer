@@ -110,7 +110,7 @@ class Platform(pygame.sprite.Sprite):
         self.speed = random.randint(-1, 1)
 
         if self.speed == 0:
-            self.moving = False
+            self.moving == False
 
     def move(self):
         hits = self.rect.colliderect(P1.rect)
