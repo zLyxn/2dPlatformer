@@ -26,8 +26,11 @@ PLAYER_SPEED = 5
 img_folder = os.path.join(os.getcwd(), "assets", "img")
 
 # Erstellung des Fensters
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("2D Platformer")
+screen = pygame.display.set_mode()#(WIDTH, HEIGHT)
+pygame.display.set_caption("von Mika und Jonathan")
+
+# Block definieren
+BLOCK_SIZE = screen.get_width()/16
 
 # Spieler-Klasse
 class Player(pygame.sprite.Sprite):
@@ -53,13 +56,14 @@ class Player(pygame.sprite.Sprite):
 
 # Plattform-Klasse
 class Platform(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height):
+    def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.image.load(os.path.join(img_folder, "grass.png")).convert_alpha()
+        self.image = pygame.image.load("./assets/img/grass.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (BLOCK_SIZE, BLOCK_SIZE))
+
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.image = pygame.transform.scale(self.image, (width, height))
+        self.rect.x = BLOCK_SIZE * x
+        self.rect.y = screen.get_height() - BLOCK_SIZE * y
 
 # Erstellen der Spieler- und Plattformgruppen
 all_sprites = pygame.sprite.Group()
@@ -68,19 +72,31 @@ platforms = pygame.sprite.Group()
 player = Player()
 all_sprites.add(player)
 
-BlockSize = screen.get_width()/16
+
 
 allPlatforms = [
-    Platform(0, HEIGHT - BlockSize, BlockSize, BlockSize),
-    Platform(BlockSize, HEIGHT - BlockSize, BlockSize, BlockSize),
-    Platform(BlockSize*2, HEIGHT - BlockSize, BlockSize, BlockSize),
-    Platform(BlockSize*3, HEIGHT - BlockSize, BlockSize, BlockSize),
-    Platform(BlockSize*4, HEIGHT - BlockSize, BlockSize, BlockSize),
-    Platform(BlockSize*4, HEIGHT - BlockSize, BlockSize, BlockSize),
-    Platform(BlockSize*6, HEIGHT - BlockSize, BlockSize, BlockSize),
-    Platform(BlockSize*7, HEIGHT - BlockSize, BlockSize, BlockSize),
-    Platform(BlockSize*8, HEIGHT - BlockSize, BlockSize, BlockSize),
-    Platform(BlockSize*9, HEIGHT - BlockSize, BlockSize, BlockSize)
+    # - REIHE 1 -#
+    Platform(0, 1),
+    Platform(1, 1),
+    Platform(2, 1),
+    Platform(3, 1),
+    Platform(4, 1),
+    Platform(5, 1),
+    Platform(6, 1),
+    Platform(7, 1),
+    Platform(8, 1),
+    Platform(9, 1),
+    Platform(10, 1),
+    Platform(11, 1),
+    Platform(12, 1),
+    Platform(13, 1),
+    Platform(14, 1),
+    Platform(15, 1),
+    # - REIHE 2 -#
+    Platform(0, 1),
+    Platform(1, 4),
+    Platform(2, 4),
+    Platform(3, 3)
 ]
 
 
