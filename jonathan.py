@@ -9,8 +9,6 @@ pygame.init()
 WIDTH = 800
 HEIGHT = 600
 
-
-
 # Farben
 WHITE = (255, 255, 255)
 LIGHT_BLUE = (173, 216, 230)
@@ -22,87 +20,111 @@ PLAYER_GRAVITY = 0.8
 PLAYER_JUMP = -15
 PLAYER_SPEED = 5
 
-# Pfad zu den Bildern
-img_folder = os.path.join(os.getcwd(), "assets", "img")
+coinCollected = False
 
 # Erstellung des Fensters
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("von Mika und Jonathan")
 
 # Block definieren
-BLOCK_SIZE = screen.get_width()/16
+BLOCK_SIZE = screen.get_width() / 16
 
 # Spieler-Klasse
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load(os.path.join(img_folder, "player.png")).convert_alpha()
+        self.image = pygame.image.load("./assets/img/player.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (int(BLOCK_SIZE / 2), int(BLOCK_SIZE)))
         self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH // 2, HEIGHT // 2)
+        self.rect.center = (BLOCK_SIZE * 1, screen.get_height() - BLOCK_SIZE * 1)
         self.vel_y = 0
+        self.on_ground = False  # Hinzufügen einer Variablen, um zu überprüfen, ob der Spieler am Boden ist
 
-    def update(self):
+    def update(self, coinCollected):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_SPACE]:
+        if (keys[pygame.K_SPACE] or keys[pygame.K_UP]) and self.on_ground:  # Spieler kann nur springen, wenn er am Boden ist
             self.vel_y = PLAYER_JUMP
+            self.on_ground = False  # Der Spieler hat den Boden verlassen, also ist er nicht mehr am Boden
         self.vel_y += PLAYER_GRAVITY
         self.rect.y += self.vel_y
         if self.rect.top > HEIGHT:
             self.rect.bottom = 0
-        if keys[pygame.K_LEFT]:
+        if keys[pygame.K_LEFT] and self.rect.left > 0:
             self.rect.x -= PLAYER_SPEED
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_RIGHT] and (self.rect.right < screen.get_width() or coinCollected):
             self.rect.x += PLAYER_SPEED
+
+    def check_collision(self, platforms):
+        for platform in platforms:
+            if pygame.sprite.collide_rect(self, platform):
+                # Überprüfen, ob der Spieler von oben auf die Plattform fällt
+                if self.vel_y > 0 and self.rect.bottom > platform.rect.top and self.rect.top < platform.rect.top:
+                    self.rect.bottom = platform.rect.top
+                    self.vel_y = 0
+                    self.on_ground = True
+                # Keine Kollisionserkennung, wenn der Spieler von unten gegen eine Plattform springt
+                elif self.vel_y < 0 and self.rect.top < platform.rect.bottom and self.rect.bottom > platform.rect.bottom:
+                    pass
+                else:
+                    # Standardkollision, wenn der Spieler seitlich gegen eine Plattform stößt
+                    self.vel_y = 0
+                    if self.vel_y > 0:
+                        self.rect.bottom = platform.rect.top
+                        self.on_ground = True
+                    else:
+                        self.rect.top = platform.rect.bottom
+                        self.on_ground = False
+
+# Münzen-Klasse
+class Coin:
+    def __init__(self, x, y):
+        self.image = pygame.image.load("./assets/img/coin.png")
+        self.image = pygame.transform.scale(self.image, (int(BLOCK_SIZE), int(BLOCK_SIZE)))
+        self.rect = self.image.get_rect()
+        self.rect.x = BLOCK_SIZE * x
+        self.rect.y = screen.get_height() - BLOCK_SIZE * y
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+    def check_collision(self, coins, player):
+        for coin in coins:
+            if(coin.rect.colliderect(player.rect)):
+                self.image = pygame.image.load("./assets/img/cloud.png")
+                return True
+            return False
+
 
 # Plattform-Klasse
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         self.image = pygame.image.load("./assets/img/grass.png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, (BLOCK_SIZE, BLOCK_SIZE))
-
+        self.image = pygame.transform.scale(self.image, (int(BLOCK_SIZE), int(BLOCK_SIZE)))
         self.rect = self.image.get_rect()
         self.rect.x = BLOCK_SIZE * x
         self.rect.y = screen.get_height() - BLOCK_SIZE * y
 
-# Erstellen der Spieler- und Plattformgruppen
-all_sprites = pygame.sprite.Group()
-platforms = pygame.sprite.Group()
+# Erstellen der Plattformen
+platforms = []
+for row, platform_row in enumerate([
+    [1] * 16,  # Reihe 1
+    [0] * 8 + [1] * 2 + [0] * 6,  # Reihe 2
+    [0] * 2 + [1] * 4 + [0] * 10,  # Reihe 3
+    [0] * 4, [1] * 2 + [0] * 2 + [1] + [0] * 7 # Reihe 4
+]):
+    for col, block in enumerate(platform_row):
+        if block == 1:
+            platforms.append(Platform(col, row + 1))  # Beachte die Verschiebung um 1 für y, um Platz für den Spieler zu lassen
+        elif block == 2:
+            platforms.append(Coin(col, row + 1))  # Beachte die Verschiebung um 1 für y, um Platz für den Spieler zu lassen
 
-player = Player()
-all_sprites.add(player)
-
-
-
-allPlatforms = [
-    # - REIHE 1 -#
-    Platform(0, 1),
-    Platform(1, 1),
-    Platform(2, 1),
-    Platform(3, 1),
-    Platform(4, 1),
-    Platform(5, 1),
-    Platform(6, 1),
-    Platform(7, 1),
-    Platform(8, 1),
-    Platform(9, 1),
-    Platform(10, 1),
-    Platform(11, 1),
-    Platform(12, 1),
-    Platform(13, 1),
-    Platform(14, 1),
-    Platform(15, 1),
-    # - REIHE 2 -#
-    Platform(0, 1),
-    Platform(1, 4),
-    Platform(2, 4),
-    Platform(3, 3)
+# Erstellen der Münzen
+coins = [
+    Coin(0, 6)
 ]
 
-
-for platform in allPlatforms:
-    platforms.add(platform)
-    all_sprites.add(platform)
+# Erstellen des Spielers
+player = Player()
 
 # Spiel-Loop
 running = True
@@ -112,21 +134,22 @@ while running:
             running = False
 
     # Update
-    all_sprites.update()
-
-    # Kollisionen
-    hits = pygame.sprite.spritecollide(player, platforms, False)
-    if hits:
-        player.rect.bottom = hits[0].rect.top
-        player.vel_y = 0
+    player.update(coinCollected)
+    player.check_collision(platforms)  # Überprüfe die Kollisionen des Spielers
 
     # Zeichnen
     screen.fill(LIGHT_BLUE)
-    all_sprites.draw(screen)
+    for platform in platforms:
+        screen.blit(platform.image, platform.rect)
+    for coin in coins:
+        coin.draw(screen)
+    screen.blit(player.image, player.rect)
     pygame.display.flip()
 
     # FPS
     pygame.time.Clock().tick(60)
+
+    coinCollected = coin.check_collision(coins, player)
 
 pygame.quit()
 sys.exit()
