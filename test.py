@@ -112,17 +112,6 @@ class Platform(pygame.sprite.Sprite):
         if self.speed == 0:
             self.moving == False
 
-    def move(self):
-        hits = self.rect.colliderect(P1.rect)
-        if self.moving:
-            self.rect.move_ip(self.speed, 0)
-            if hits:
-                P1.pos += (self.speed, 0)
-            if self.speed > 0 and self.rect.left > WIDTH:
-                self.rect.right = 0
-            if self.speed < 0 and self.rect.right < 0:
-                self.rect.left = WIDTH
-
     def generateCoin(self):
         if self.speed == 0:
             coins.add(Coin((self.rect.centerx, self.rect.centery - 50)))
