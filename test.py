@@ -33,11 +33,7 @@ class Player(pygame.sprite.Sprite):
         self.jumping = False
         self.score = 0
 
-    def move(self) -> None:
-        """
-        handles player movement
-        :rtype: None
-        """
+    def move(self):
         self.acc = vec(0, 0.5)
 
         pressed_keys = pygame.key.get_pressed()
@@ -58,30 +54,18 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.midbottom = self.pos
 
-    def jump(self) -> None:
-        """
-        handles player jump
-        :rtype: None
-        """
+    def jump(self):
         hits = pygame.sprite.spritecollide(self, platforms, False)
         if hits and not self.jumping:
             self.jumping = True
             self.vel.y = -15
 
-    def cancel_jump(self) -> None:
-        """
-        cancel player jump, by setting velocity to 0
-        :rtype: None
-        """
+    def cancel_jump(self):
         if self.jumping:
             if self.vel.y < -3:
                 self.vel.y = -3
 
-    def update(self) -> None:
-        """
-        handles player by hitting platform
-        :rtype: None
-        """
+    def update(self):
         hits = pygame.sprite.spritecollide(self, platforms, False)
         if self.vel.y > 0:
             if hits:
@@ -128,6 +112,17 @@ class Platform(pygame.sprite.Sprite):
         if self.speed == 0:
             self.moving = False
 
+    def move(self):
+        hits = self.rect.colliderect(P1.rect)
+        if self.moving:
+            self.rect.move_ip(self.speed, 0)
+            if hits:
+                P1.pos += (self.speed, 0)
+            if self.speed > 0 and self.rect.left > WIDTH:
+                self.rect.right = 0
+            if self.speed < 0 and self.rect.right < 0:
+                self.rect.left = WIDTH
+
     def generateCoin(self):
         if self.speed == 0:
             coins.add(Coin((self.rect.centerx, self.rect.centery - 50)))
@@ -146,21 +141,37 @@ def check(platform, groupies):
         C = False
 
 
-def plat_gen():
-    while len(platforms) < 6:
-        width = random.randrange(50, 100)
-        p = None
-        checked = True
+# def plat_gen():
+#     while len(platforms) < 6:
+#         width = random.randrange(50, 100)
+#         p = None
+#         checked = True
+#
+#         while checked:
+#             p = Platform()
+#             p.rect.center = (random.randrange(0, WIDTH - width),
+#                              random.randrange(-50, 0))
+#             checked = check(p, platforms)
+#
+#         p.generateCoin()
+#         platforms.add(p)
+#         all_sprites.add(p)
 
-        while checked:
-            p = Platform()
-            p.rect.center = (random.randrange(0, WIDTH - width),
-                             random.randrange(-50, 0))
-            checked = check(p, platforms)
+# Define segments of platforms and coins
+segment1 = [
+    [Platform(200, 18), Coin((150, 300))],
+    [Platform(100, 18), Platform(80, 18), Coin((300, 250))],
+    # Add more platforms and coins as needed
+]
 
-        p.generateCoin()
-        platforms.add(p)
-        all_sprites.add(p)
+segment2 = [
+    [Platform(150, 18), Coin((100, 300))],
+    [Platform(100, 18), Platform(120, 18), Coin((250, 250))],
+    # Add more platforms and coins as needed
+]
+
+# List of segments
+segments = [segment1, segment2]  # Add more segments as needed
 
 
 all_sprites = pygame.sprite.Group()
@@ -175,7 +186,16 @@ PT1.moving = False
 PT1.point = False
 
 P1 = Player()
+# Function to add a segment to the game
+def add_segment(segment):
+    for subsegment in segment:
+        for item in subsegment:
+            platforms.add(item)
+            all_sprites.add(item)
 
+
+def generate_segment():
+    return random.choice(segments)
 all_sprites.add(PT1)
 all_sprites.add(P1)
 platforms.add(PT1)
@@ -189,7 +209,8 @@ for x in range(random.randint(4, 5)):
     pl.generateCoin()
     platforms.add(pl)
     all_sprites.add(pl)
-
+current_segment = generate_segment()
+add_segment(current_segment)
 while True:
     P1.update()
     for event in pygame.event.get():
