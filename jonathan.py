@@ -26,7 +26,7 @@ PLAYER_SPEED = 5
 img_folder = os.path.join(os.getcwd(), "assets", "img")
 
 # Erstellung des Fensters
-screen = pygame.display.set_mode()#(WIDTH, HEIGHT)
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("von Mika und Jonathan")
 
 # Block definieren
