@@ -33,7 +33,11 @@ class Player(pygame.sprite.Sprite):
         self.jumping = False
         self.score = 0
 
-    def move(self):
+    def move(self) -> None:
+        """
+        handles player movement
+        :rtype: None
+        """
         self.acc = vec(0, 0.5)
 
         pressed_keys = pygame.key.get_pressed()
@@ -54,18 +58,30 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.midbottom = self.pos
 
-    def jump(self):
+    def jump(self) -> None:
+        """
+        handles player jump
+        :rtype: None
+        """
         hits = pygame.sprite.spritecollide(self, platforms, False)
         if hits and not self.jumping:
             self.jumping = True
             self.vel.y = -15
 
-    def cancel_jump(self):
+    def cancel_jump(self) -> None:
+        """
+        cancel player jump, by setting velocity to 0
+        :rtype: None
+        """
         if self.jumping:
             if self.vel.y < -3:
                 self.vel.y = -3
 
-    def update(self):
+    def update(self) -> None:
+        """
+        handles player by hitting platform
+        :rtype: None
+        """
         hits = pygame.sprite.spritecollide(self, platforms, False)
         if self.vel.y > 0:
             if hits:
