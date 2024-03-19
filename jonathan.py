@@ -36,6 +36,7 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load("./assets/img/player.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (int(BLOCK_SIZE / 2), int(BLOCK_SIZE)))
         self.rect = self.image.get_rect()
+
         self.rect.center = (BLOCK_SIZE * 1, screen.get_height() - BLOCK_SIZE * 1)
         self.vel_y = 0
         self.on_ground = False  # Hinzufügen einer Variablen, um zu überprüfen, ob der Spieler am Boden ist
@@ -96,13 +97,38 @@ class Coin:
 
 # Plattform-Klasse
 class Platform(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, material):
         super().__init__()
-        self.image = pygame.image.load("./assets/img/grass.png").convert_alpha()
+        if material == 1:
+            self.image = pygame.image.load("./assets/img/grass.png").convert_alpha()
+        elif material == 2:
+            self.image = pygame.image.load("./assets/img/dirt.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (int(BLOCK_SIZE), int(BLOCK_SIZE)))
         self.rect = self.image.get_rect()
         self.rect.x = BLOCK_SIZE * x
         self.rect.y = screen.get_height() - BLOCK_SIZE * y
+
+class Game:
+    def __init__(self):
+        self.handle_end()
+    def handle_end(self):
+        if player.rect.x > screen.get_width():
+            print("Game Over")
+            screen.fill(LIGHT_BLUE)
+            pygame.display.flip()
+    def draw_level(self):
+        if player.rect.x < screen.get_width():
+            # Zeichnen
+            screen.fill(LIGHT_BLUE)
+            for platform in platforms:
+                screen.blit(platform.image, platform.rect)
+            for coin in coins:
+                coin.draw(screen)
+            screen.blit(player.image, player.rect)
+            pygame.display.flip()
+
+        return coin
+
 
 # Erstellen der Plattformen
 platforms = []
@@ -110,13 +136,12 @@ for row, platform_row in enumerate([
     [1] * 16,  # Reihe 1
     [0] * 8 + [1] * 2 + [0] * 6,  # Reihe 2
     [0] * 2 + [1] * 4 + [0] * 10,  # Reihe 3
-    [0] * 4, [1] * 2 + [0] * 2 + [1] + [0] * 7 # Reihe 4
 ]):
     for col, block in enumerate(platform_row):
         if block == 1:
-            platforms.append(Platform(col, row + 1))  # Beachte die Verschiebung um 1 für y, um Platz für den Spieler zu lassen
+            platforms.append(Platform(col, row + 1, 1))  # Beachte die Verschiebung um 1 für y, um Platz für den Spieler zu lassen
         elif block == 2:
-            platforms.append(Coin(col, row + 1))  # Beachte die Verschiebung um 1 für y, um Platz für den Spieler zu lassen
+            platforms.append(Platform(col, row + 1, 2))  # Beachte die Verschiebung um 1 für y, um Platz für den Spieler zu lassen
 
 # Erstellen der Münzen
 coins = [
@@ -125,6 +150,7 @@ coins = [
 
 # Erstellen des Spielers
 player = Player()
+game = Game()
 
 # Spiel-Loop
 running = True
@@ -137,19 +163,15 @@ while running:
     player.update(coinCollected)
     player.check_collision(platforms)  # Überprüfe die Kollisionen des Spielers
 
-    # Zeichnen
-    screen.fill(LIGHT_BLUE)
-    for platform in platforms:
-        screen.blit(platform.image, platform.rect)
-    for coin in coins:
-        coin.draw(screen)
-    screen.blit(player.image, player.rect)
-    pygame.display.flip()
+    coin = game.draw_level()
+
+    coinCollected = coin.check_collision(coins, player, coinCollected)
 
     # FPS
     pygame.time.Clock().tick(60)
 
-    coinCollected = coin.check_collision(coins, player, coinCollected)
+    # Spiel Ende
+    game.handle_end()
 
 pygame.quit()
 sys.exit()
