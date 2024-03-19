@@ -86,9 +86,9 @@ class Coin:
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
-    def check_collision(self, coins, player):
+    def check_collision(self, coins, player, coinCollected):
         for coin in coins:
-            if(coin.rect.colliderect(player.rect)):
+            if(coin.rect.colliderect(player.rect) or coinCollected):
                 self.image = pygame.image.load("./assets/img/cloud.png")
                 return True
             return False
@@ -149,7 +149,7 @@ while running:
     # FPS
     pygame.time.Clock().tick(60)
 
-    coinCollected = coin.check_collision(coins, player)
+    coinCollected = coin.check_collision(coins, player, coinCollected)
 
 pygame.quit()
 sys.exit()
