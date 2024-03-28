@@ -89,7 +89,7 @@ class Coin:
         screen.blit(self.image, self.rect)
     def check_collision(self, coins, player, coinCollected):
         for coin in coins:
-            if(coin.rect.colliderect(player.rect) or coinCollected):
+            if coin.rect.colliderect(player.rect) or coinCollected:
                 self.image = pygame.image.load("./assets/img/cloud.png")
                 return True
             return False

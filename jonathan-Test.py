@@ -32,15 +32,20 @@ BLOCK_SIZE = screen.get_width() / 16
 
 class Game:
     def __init__(self):
-        self.game_loop()
-        self.level = Level()
-    def game_loop(self):
+        player = Player(1, 2)
+        self.game_loop(player)
+
+    def game_loop(self, player):
         screen.fill(LIGHT_BLUE)
-        self.player_move()
-    def player_move(self):
+        self.player_move(player)
+        Level()
+
+    def player_move(self, player):
+
         self.keys = pygame.key.get_pressed()
         if self.keys[pygame.K_w]:
-            pass
+            print('Key pressed')
+            player.rect.update(100, 100, BLOCK_SIZE, BLOCK_SIZE)
 
 
 # Spieler-Klasse
@@ -65,6 +70,7 @@ class Block:
         self.rect.update(BLOCK_SIZE * x, screen.get_height() - (BLOCK_SIZE * y), BLOCK_SIZE, BLOCK_SIZE)  # Position
         screen.blit(self.image, self.rect)
 
+
 class Coin:
     def __init__(self, x, y):
         x -= 1
@@ -73,6 +79,7 @@ class Coin:
         self.rect = self.image.get_rect()
         self.rect.update(BLOCK_SIZE * x, screen.get_height() - (BLOCK_SIZE * y), BLOCK_SIZE, BLOCK_SIZE)  # Position
         screen.blit(self.image, self.rect)
+
 
 class Level:
     def __init__(self):
@@ -100,6 +107,7 @@ class Level:
 
 
 game = Game()
+player = Player(1, 2)
 
 # Game-Loop
 running = True
@@ -109,7 +117,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    game.game_loop()
+    game.game_loop(player)
 
     # FPS
     pygame.time.Clock().tick(60)
