@@ -1,6 +1,5 @@
 import pygame
 import sys
-import os
 
 # Initialisierung von Pygame
 pygame.init()
@@ -29,85 +28,119 @@ pygame.display.set_caption("von Mika und Jonathan")
 # Block definieren
 BLOCK_SIZE = screen.get_width() / 16
 
+# default Position
+playerPosition = pygame.Vector2(4, 2)
+
 
 class Game:
     def __init__(self):
-        player = Player(1, 2)
-        self.game_loop(player)
+        self.player = Player()
+        self.level = Level()
 
-    def game_loop(self, player):
+    def game_loop(self):
         screen.fill(LIGHT_BLUE)
-        self.player_move(player)
-        Level()
+        self.level.draw()
+        self.player.draw()
+        pygame.display.flip()
 
-    def player_move(self, player):
-
-        self.keys = pygame.key.get_pressed()
-        if self.keys[pygame.K_w]:
-            print('Key pressed')
-            player.rect.update(100, 100, BLOCK_SIZE, BLOCK_SIZE)
+    def player_move(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_w] and not self.player.is_block_above(self.level.blocks_group) and self.player.rect.top > 0:
+            self.player.jump()  # Änderung: Spieler springen lassen, wenn W gedrückt wird
+        if keys[pygame.K_a] and not self.player.is_block_left(self.level.blocks_group) and self.player.rect.left > 0:
+            self.player.rect.x -= PLAYER_SPEED
+        if keys[pygame.K_d] and not self.player.is_block_right(self.level.blocks_group) and self.player.rect.right < screen.get_width():
+            self.player.rect.x += PLAYER_SPEED
 
 
 # Spieler-Klasse
-class Player:
-    def __init__(self, x, y):
-        x -= 1
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
         self.image = pygame.image.load("./assets/img/player.png").convert_alpha()  # Bild laden
-        self.image = pygame.transform.scale(self.image, (BLOCK_SIZE / 2, BLOCK_SIZE))  # Größe ändern
+        self.image = pygame.transform.scale(self.image, (int(BLOCK_SIZE / 2), int(BLOCK_SIZE)))  # Größe ändern
         self.rect = self.image.get_rect()  # Rect erstellen
-        self.rect.update(BLOCK_SIZE * x, screen.get_height() - (BLOCK_SIZE * y), BLOCK_SIZE, BLOCK_SIZE)  # Position
+        self.rect.topleft = (BLOCK_SIZE * playerPosition.x, BLOCK_SIZE * playerPosition.y)  # Position
+        self.velocity_y = 0  # Vertikale Geschwindigkeit des Spielers
+        self.on_ground = False  # Variable zur Überprüfung, ob der Spieler auf dem Boden ist
+
+    def update(self):
+        # Bewegung aktualisieren
+        self.rect.y += self.velocity_y
+
+        # Spieler auf dem Boden halten
+        if self.rect.bottom >= screen.get_height():
+            self.rect.bottom = screen.get_height()
+            self.on_ground = True
+            self.velocity_y = 0
+        else:
+            self.velocity_y += PLAYER_GRAVITY  # Schwerkraft anwenden, um nach unten zu ziehen
+
+    def jump(self):
+        if self.on_ground:  # Nur wenn der Spieler auf dem Boden ist
+            self.velocity_y = PLAYER_JUMP
+            self.on_ground = False
+
+    def draw(self):
         screen.blit(self.image, self.rect)
 
-        self.on_ground = False  # Var ob der Spieler am Boden ist
+    def is_block_above(self, block_group):
+        player_rect = self.rect
+        for block in block_group:
+            if block.rect.bottom == player_rect.top and player_rect.left < block.rect.right and player_rect.right > block.rect.left:
+                return True
+        return False
 
+    def is_block_below(self, block_group):
+        player_rect = self.rect
+        for block in block_group:
+            if block.rect.top == player_rect.bottom and player_rect.left < block.rect.right and player_rect.right > block.rect.left:
+                return True
+        return False
 
-class Block:
-    def __init__(self, x, y):
-        x -= 1
-        self.image = pygame.image.load("./assets/img/grass.png")
-        self.image = pygame.transform.scale(self.image, (BLOCK_SIZE, BLOCK_SIZE))
-        self.rect = self.image.get_rect()
-        self.rect.update(BLOCK_SIZE * x, screen.get_height() - (BLOCK_SIZE * y), BLOCK_SIZE, BLOCK_SIZE)  # Position
-        screen.blit(self.image, self.rect)
+    def is_block_left(self, block_group):
+        player_rect = self.rect
+        for block in block_group:
+            if block.rect.right == player_rect.left and player_rect.top < block.rect.bottom and player_rect.bottom > block.rect.top:
+                return True
+        return False
 
-
-class Coin:
-    def __init__(self, x, y):
-        x -= 1
-        self.image = pygame.image.load("./assets/img/coin.png")
-        self.image = pygame.transform.scale(self.image, (BLOCK_SIZE, BLOCK_SIZE))
-        self.rect = self.image.get_rect()
-        self.rect.update(BLOCK_SIZE * x, screen.get_height() - (BLOCK_SIZE * y), BLOCK_SIZE, BLOCK_SIZE)  # Position
-        screen.blit(self.image, self.rect)
+    def is_block_right(self, block_group):
+        player_rect = self.rect
+        for block in block_group:
+            if block.rect.left == player_rect.right and player_rect.top < block.rect.bottom and player_rect.bottom > block.rect.top:
+                return True
+        return False
 
 
 class Level:
     def __init__(self):
-        self.one()
+        self.blocks_group = pygame.sprite.Group()  # Erstelle eine Gruppe für die Blöcke
+        self.create_blocks()  # Erstelle die Blöcke
 
-    def one(self):
-        Block(1, 1)
-        Block(2, 1)
-        Block(3, 1)
-        Block(4, 1)
-        Block(5, 1)
-        Block(6, 1)
-        Block(7, 1)
-        Block(8, 1)
-        Block(9, 1)
-        Block(10, 1)
-        Block(11, 1)
-        Block(12, 1)
-        Block(13, 1)
-        Block(14, 1)
-        Block(15, 1)
-        Block(16, 1)
-        Player(1, 2)
-        Coin(2, 2)
+    def create_blocks(self):
+        # Erstelle die Blöcke und füge sie der Gruppe hinzu
+        block_positions = [(x, 1) for x in range(1, 17)]  # Boden
+        block_positions.extend([(5, 3), (10, 2)])  # Zusatz Blöcke
+        for block_pos in block_positions:
+            block = Block(*block_pos)
+            self.blocks_group.add(block)
+
+    def draw(self):
+        self.blocks_group.draw(screen)
+
+
+class Block(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        x -= 1
+        self.image = pygame.image.load("./assets/img/grass.png")
+        self.image = pygame.transform.scale(self.image, (int(BLOCK_SIZE), int(BLOCK_SIZE)))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (BLOCK_SIZE * x, screen.get_height() - (BLOCK_SIZE * y))  # Position
 
 
 game = Game()
-player = Player(1, 2)
 
 # Game-Loop
 running = True
@@ -117,13 +150,12 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    game.game_loop(player)
+    game.player_move()  # Spielerbewegung aktualisieren
+    game.player.update()  # Spieler aktualisieren (z. B. für Schwerkraft)
+    game.game_loop()  # Spiel-Loop aktualisieren
 
     # FPS
     pygame.time.Clock().tick(60)
-
-    # Macht zeichnen möglich
-    pygame.display.flip()
 
 pygame.quit()
 sys.exit()
