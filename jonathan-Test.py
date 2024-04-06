@@ -48,12 +48,11 @@ class Game:
 
     def player_move(self):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_w] and not self.player.is_block_above(self.level.blocks_group) and self.player.rect.top > 0:
+        if keys[pygame.K_w] and not self.player.is_block_above() and self.player.rect.top > 0:
             self.player.jump()  # Änderung: Spieler springen lassen, wenn W gedrückt wird
-        if keys[pygame.K_a] and not self.player.is_block_left(self.level.blocks_group) and self.player.rect.left > 0:
+        if keys[pygame.K_a] and not self.player.is_block_left() and self.player.rect.left > 0:
             self.player.rect.x -= PLAYER_SPEED
-        if keys[pygame.K_d] and not self.player.is_block_right(
-                self.level.blocks_group) and self.player.rect.right < screen.get_width():
+        if keys[pygame.K_d] and not self.player.is_block_right() and self.player.rect.right < screen.get_width():
             self.player.rect.x += PLAYER_SPEED
 
 
@@ -73,8 +72,9 @@ class Player(pygame.sprite.Sprite):
         self.rect.y += self.velocity_y
 
         # Überprüfen, ob der Spieler auf dem Boden steht oder auf einem Block steht
-        if self.is_block_below() or self.rect.bottom >= screen.get_height():
-            self.rect.bottom = screen.get_height()
+        if self.rect.bottom >= screen.get_height() or self.is_block_below():
+            if self.rect.bottom >= screen.get_height():
+                self.rect.bottom = screen.get_height()
             self.on_ground = True
             self.velocity_y = 0
         else:
@@ -105,47 +105,37 @@ class Player(pygame.sprite.Sprite):
                         break
 
     def jump(self):
-        if self.on_ground:  # Nur wenn der Spieler auf dem Boden ist
+        if self.on_ground and not self.is_block_above():  # Nur wenn der Spieler auf dem Boden ist
             self.velocity_y = PLAYER_JUMP
             self.on_ground = False
 
     def draw(self):
         screen.blit(self.image, self.rect)
 
-    def is_block_above(self, block_group):
+    def is_block_above(self):
         player_rect = self.rect
-        for block in block_group:
+        for block in self.level.blocks_group:
             if block.rect.bottom == player_rect.top and player_rect.left < block.rect.right and player_rect.right > block.rect.left:
                 return True
         return False
 
     def is_block_below(self):
-        player_rect = self.rect.copy()
-        player_rect.y += 1  # Verschiebung des Spielers nach unten um die Höhe eines Blocks
         for block in self.level.blocks_group:
-            if block.rect.colliderect(player_rect):
-                # Setze die Y-Geschwindigkeit auf 0, wenn der Spieler auf einen Block trifft
-                self.velocity_y = 0
+            if (block.rect.top == self.rect.bottom) and (block.rect.left <= self.rect.left) and (
+                    block.rect.right >= self.rect.right):
                 return True
         return False
 
-    # def is_block_below(self, block_group):
-    #    player_rect = self.rect
-    #    for block in block_group:
-    #        if block.rect.top == player_rect.bottom and player_rect.left < block.rect.right and player_rect.right > block.rect.left:
-    #            return True
-    #    return False
-
-    def is_block_left(self, block_group):
+    def is_block_left(self):
         player_rect = self.rect
-        for block in block_group:
+        for block in self.level.blocks_group:
             if block.rect.right == player_rect.left and player_rect.top < block.rect.bottom and player_rect.bottom > block.rect.top:
                 return True
         return False
 
-    def is_block_right(self, block_group):
+    def is_block_right(self):
         player_rect = self.rect
-        for block in block_group:
+        for block in self.level.blocks_group:
             if block.rect.left == player_rect.right and player_rect.top < block.rect.bottom and player_rect.bottom > block.rect.top:
                 return True
         return False
@@ -157,9 +147,12 @@ class Level:
         self.create_blocks()
 
     def create_blocks(self):
-        block_positions = [(x + 1, 3) for x in range(4, 7)]
-        block_positions.extend([(x + 1, 2) for x in range(9, 12)])
-        block_positions.extend([(1, 1), (10, 2)])
+
+        block_positions = [(x + 0, 1) for x in range(1, 17)]
+        block_positions.extend([(x + 2, 3) for x in range(1, 5)])
+        block_positions.extend([(x + 8, 2) for x in range(1, 3)])
+        #block_positions.extend([(1, 1), (10, 2)])
+
         for block_pos in block_positions:
             block = Block(*block_pos)
             self.blocks_group.add(block)
@@ -186,7 +179,6 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
 
     game.game_loop()
 
