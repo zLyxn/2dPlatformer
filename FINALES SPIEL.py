@@ -30,7 +30,6 @@ BLOCK_SIZE = screen.get_width() / 16
 playerPosition = pygame.Vector2(0, 2)
 
 
-
 class Game:
     def __init__(self):
         self.level = Level()
@@ -59,16 +58,18 @@ class Game:
             self.player.jump()
         if (keys[pygame.K_a] or keys[pygame.K_LEFT]) and not self.player.is_block_left() and self.player.rect.left > 0:
             self.player.rect.x -= PLAYER_SPEED
-        if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) and not self.player.is_block_right() and self.player.rect.right < screen.get_width():
+        if (keys[pygame.K_d] or keys[
+            pygame.K_RIGHT]) and not self.player.is_block_right() and self.player.rect.right < screen.get_width():
             self.player.rect.x += PLAYER_SPEED
 
     def check_collect_coin(self):
-        collected_coins = pygame.sprite.spritecollide(self.player, self.level.coins_group, True)
+        collected_coins = pygame.sprite.spritecollide(self.player, self.level.coins_group, True)  # TODO
         if collected_coins:
             self.game_over = True
             self.level_complete()
 
-    def level_complete(self):
+    @staticmethod
+    def level_complete():
         screen.fill(WHITE)
         font = pygame.font.SysFont(None, 64)
         text = font.render("Level geschafft!", True, (0, 0, 0))
@@ -77,11 +78,9 @@ class Game:
         pygame.display.flip()
 
 
-
 # Spieler-Klasse
-class Player(pygame.sprite.Sprite):
+class Player:
     def __init__(self, level):
-        super().__init__()
         self.image = pygame.image.load("./assets/img/player.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (int(BLOCK_SIZE / 2), int(BLOCK_SIZE)))
         self.rect = self.image.get_rect()
@@ -204,6 +203,7 @@ class Block(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = (BLOCK_SIZE * x, screen.get_height() - (BLOCK_SIZE * y))  # Position
 
+
 class Coin(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -222,8 +222,8 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    if(game.game_over):
-        game.level_complete
+    if game.game_over:
+        game.level_complete()
     else:
         game.game_loop()
 
