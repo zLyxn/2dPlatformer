@@ -189,6 +189,24 @@ class Level:
             block = Block(*block_pos)
             self.blocks_group.add(block)
 
+    def create_2(self):
+        # Münzen
+        # coin_positions = [(3, 3), (7, 5), (10, 7)]
+        coin_positions = [(1, 10)]
+
+        for coin_pos in coin_positions:
+            coin = Coin(*coin_pos)
+            self.coins_group.add(coin)
+
+        # Blöcke
+        block_positions = [(x + 0, 1) for x in range(1, 17)]
+        block_positions.extend([(x + 5, 3) for x in range(1, 5)])
+        block_positions.extend([(9, 7), (13, 5), (5, 8)]) # (4, 11)
+
+        for block_pos in block_positions:
+            block = Block(*block_pos)
+            self.blocks_group.add(block)
+
     def draw(self):
         self.blocks_group.draw(screen)
         self.coins_group.draw(screen)
